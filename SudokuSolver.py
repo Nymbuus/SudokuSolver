@@ -6,6 +6,10 @@ horizontal = []
 
 # Feeds the sudoku into the horizontal list.
 # Makes integers out of the strings in the end.
+# Returns a horizontal list with numbers from the unsolved sudoku.
+#
+#      - f = Cotains the file "Pussel.csv" which has the sudoku that will be solved.
+#      - pussellist = This list contains the all the numbers as strings.
 def horizontal_list_filler():
     f = open('Pussel.csv')
     pussellist = []
@@ -24,13 +28,13 @@ def horizontal_list_filler():
     return horizontal
 
 
-# Makes a 2D-list filled with zeros
+# Makes a 2D-list filled with zeros and returns it.
 def zerolistMaker():
     listOfZeros = [[0] * 9] * 9
     return listOfZeros
 
 
-# Fills in the vertical lane called for
+# Fills in the vertical lane called for with the values form the horzontal lanes and returns it as a list.
 def vertical_list_filler(i):
     return_List = []
     for j in range(0,9):
@@ -38,7 +42,7 @@ def vertical_list_filler(i):
     return return_List
 
 
-# Fills in all the vertical lanes with the values form the horzontal lanes.
+# Fills in all the vertical lanes 
 def fill_in_vertical():
     for i in range(0,9):
         vertical.append(vertical_list_filler(i))
@@ -52,6 +56,7 @@ def fill_a_box(k,l):
         for j in range(0,3):
             return_List.append(horizontal[i+l][j+k])
     return return_List
+
 
 # Fills in boxes with values
 def fill_in_box():
@@ -70,42 +75,53 @@ def fill_in_box():
 # If there is a match it will continue to look for more zeros in the box and repeat the process until it has gone through numbers 1-9.
 # If this process goes all the way through with one number it will apply it to the space where it first checked.
 # If the process dosnt go all the way through with the number it will check the next one and in the end jump to the next space to repeat the process.
-# This process goes through all the 9x9 spaces in the soduko one time and there might be missing numbers that wasnt resolved but will be in the next time the function is called. 
-def check_for_solution(i,j):
+# This process goes through all the 9x9 spaces in the soduko one time and there might be missing numbers that wasnt resolved but will be in the next time the function is called.
+#
+#      - box_number = Is the 3x3box which the function currently is checking.
+#      - space_number = Is the space in the 3x3box which the functio currently is checking.
+#      - number_check = Is the number that the function checks if it fits in the space.
+#      - other_space_number = Is the other spaces in the 3x3box that the function is checking. Its checking if there is a missing number and
+#                             if the number in the variable number_check is blocked in these spaces.
+def check_for_solution(box_number,space_number):
     possible_box = []
 
     #Checks box for missing numbers
-    for k in range(1,10):
-        print(f"k={k}      i={i}")
-        if k not in box[i]:
-            possible_box.append(k)
+    for number_check in range(1,10):
+        print(f"number_check={number_check}      box_number={box_number}")
+        if number_check not in box[box_number]:
+            possible_box.append(number_check)
             print(f'Possible box numbers: {possible_box}')
             # if the number isnt in the horizontal or vertical lane it continues
-            print(f'k={k}   j={j}   j/3={int(j/3)}   i={i}   vertical_list={vertical[(j%3)+((i%3)*3)]}    horizontal_list={horizontal[(int(j/3))+(int(i/3)*3)]}')
-            if k not in horizontal[(int(j/3))+(int(i/3)*3)] and k not in vertical[(j%3)+((i%3)*3)]:
+            print(f'number_check={number_check}   space_number={space_number}   space_number/3={int(space_number/3)}   box_number={box_number}   vertical_list={vertical[(space_number%3)+((box_number%3)*3)]}    horizontal_list={horizontal[(int(space_number/3))+(int(box_number/3)*3)]}')
+            if number_check not in horizontal[(int(space_number/3))+(int(box_number/3)*3)] and number_check not in vertical[(space_number%3)+((box_number%3)*3)]:
                 print("continue after horzontal and vertical check")
-                for l in range(0,10):
-                    if l != j:
-                        print(f'l={l}')
-                        if l == 9:
-                            box[i][j] = k
-                            print(f"BOX_CORDINATE[{i}][{j}] = k={k}")
+                for other_space_number in range(0,10):
+                    if other_space_number != space_number:
+                        print(f'other_space_number={other_space_number}')
+                        if other_space_number == 9:
+                            box[box_number][space_number] = number_check
+                            print(f"BOX_CORDINATE[{box_number}][{space_number}] = number_check={number_check}")
                             return
-                        elif box[i][l] == 0:
-                            print(f"Check hori & verti blocking  l={l}  i={i}  vertical={((l%3))+((i%3)*3)}  horizontal_line={horizontal[int(l/3)]}  vertical_line={vertical[((l%3))+((i%3)*3)]}")
-                            if k in horizontal[int(l/3)+(int(i/3)*3)] or k in vertical[((l%3))+((i%3)*3)]:
-                                print(f"in this boxIndex={l} k={k} is blocked")
+                        elif box[box_number][other_space_number] == 0:
+                            print(f"Check hori & verti blocking  other_space_number={other_space_number}  box_number={box_number}  vertical={((other_space_number%3))+((box_number%3)*3)}  horizontal_line={horizontal[int(other_space_number/3)]}  vertical_line={vertical[((other_space_number%3))+((box_number%3)*3)]}")
+                            if number_check in horizontal[int(other_space_number/3)+(int(box_number/3)*3)] or number_check in vertical[((other_space_number%3))+((box_number%3)*3)]:
+                                print(f"in this boxIndex={other_space_number} number_check={number_check} is blocked")
                             else:
                                 break
 
-# Goes through all the 3x3boxes and checks for any missing numbers(0). If there is then it calls the check_for_solution function.
+
+# Goes through all the 3x3boxes and checks for any missing numbers(0). If there is then it calls the check_for_solution function and then update the sudokulists.
+#
+#      - box_number = Is the 3x3box which the function currently is checking.
+#      - space_number = Is the space in the 3x3box which the functio currently is checking.
 def the_sudoku_solver():
-    for i in range(0,9):
-        for j in range(0,9):
-            if box[i][j] == 0:
-                print(f'checking this number: {box[i][j]} in cordinates {i}, {j}')
-                check_for_solution(i,j)
+    for box_number in range(0,9):
+        for box_space in range(0,9):
+            if box[box_number][box_space] == 0:
+                print(f'checking this number: {box[box_number][box_space]} in box {box_number}, {box_space}')
+                check_for_solution(box_number,box_space)
                 update()
+
 
 # Update all the horizontal and vertical cordinates from the box cordinates.
 #
@@ -136,7 +152,12 @@ def update():
     for i in range(0, 9):
         print(f"{vertical[i]}")
 
-#Checks if there are any zeros left in the sudoku. If there is then it sudoku_solver function. If not it prints the solved sudoku.
+
+# Checks if there are any zeros left in the sudoku. If there is then it sudoku_solver function. If not it prints the solved sudoku.
+#
+#      - tries = Is the amount of iterations through the_sudoku_solver function before the sudoku is solved
+#      - not_completed = this increments if the_sudoku_solver is called and the while loop will continue if above 0.
+#                        If the_sudoku_solver isnt called then the while loop ends.
 def check_if_solved():
     tries = 0
     not_completed = 1
@@ -147,7 +168,6 @@ def check_if_solved():
                 the_sudoku_solver()
                 not_completed += 1
                 tries += 1
-
 
     print(f"tries={tries}")
     print("Solved!")
@@ -160,4 +180,5 @@ horizontal = horizontal_list_filler()
 vertical = fill_in_vertical()
 box = fill_in_box()
 
+# Solves the sudoku.
 check_if_solved()
