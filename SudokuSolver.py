@@ -108,19 +108,26 @@ def the_sudoku_solver():
                 update()
 
 # Update all the horizontal and vertical cordinates from the box cordinates.
+#
+#      - horizontal_lane = Horizontal lanes in the sudoku from top to bottom
+#      - vertical_lane = Vertical lanes in the sudoku from left to right
+#      - box_number = the number of the 3x3box in the sudoku, starts top left to top right then one down to the far left and repeat.
+#      - space_number = the number of the space in the in the 3x3box. Uses the same logic to count spaces as the 3x3box.
+#      - box_row = There are three rows of boxes in the sudoku and this is the variable that selects that.
+#      - space_row = Same logic as box_row but in the 3x3box itself.
 def update():
-    i = 0
-    j = 0
-    for g in range(0,3):
-        for h in range(0,3):
-            for e in range(0+(g*3),3+(g*3)):
-                for d in range(0+(h*3),3+(h*3)):
-                    horizontal[i][j] = box[e][d]
-                    vertical[j][i] = horizontal[i][j]
-                    j += 1
-                    if j == 9:
-                        j = 0
-                        i += 1
+    horizontal_lane = 0
+    vertical_lane = 0
+    for box_row in range(0,3):
+        for space_row in range(0,3):
+            for box_number in range(0+(box_row*3),3+(box_row*3)):
+                for space_number in range(0+(space_row*3),3+(space_row*3)):
+                    horizontal[horizontal_lane][vertical_lane] = box[box_number][space_number]
+                    vertical[vertical_lane][horizontal_lane] = horizontal[horizontal_lane][vertical_lane]
+                    vertical_lane += 1
+                    if vertical_lane == 9:
+                        vertical_lane = 0
+                        horizontal_lane += 1
     print("UPDATED HORIZONTAL and VERTICAL LINES:")
     print("Horizontal Lines:\n")
     for i in range(0, 9):
